@@ -26,7 +26,8 @@ class Company(models.Model):
         db_table = "companies"
 
 class TagCategory(models.Model):
-    name = models.CharField(max_length=45, unique=True)
+    name               = models.CharField(max_length=45, unique=True)
+    is_multiple_choice = models.BooleanField(default=False)
 
     class Meta:
         db_table = "tag_categories"
