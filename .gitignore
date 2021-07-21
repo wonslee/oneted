@@ -359,5 +359,6 @@ zsdoc/data
 *.csv
 my_settings.py
 uploader.py
+.idea
 
 # End of https://www.toptal.com/developers/gitignore/api/python,visualstudiocode,linux,pycharm,vim,macos,zshp
