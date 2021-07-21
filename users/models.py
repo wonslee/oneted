@@ -3,23 +3,23 @@ from oneted.common import TimeStampModel
 
 # Create your views here.
 class User(TimeStampModel):
-    name          = models.CharField(max_length = 20)
-    email         = models.EmailField(max_length = 100, unique = True)
+    name          = models.CharField(max_length=20)
+    email         = models.EmailField(max_length=100, unique=True)
     profile_image = models.URLField()
-    kakao_api_id  = models.IntegerField()
-    google_api_id = models.IntegerField()
+    kakao_api_id  = models.IntegerField(null=True)
+    google_api_id = models.IntegerField(null=True)
 
     class Meta :
         db_table = "users"
 
 class Platform(models.Model):
-    name = models.CharField(max_length = 45)
+    name = models.CharField(max_length=45)
 
     class Meta:
         db_table = "platforms"
 
 class UserPlatform(models.Model):
-    platform_user_id = models.CharField(max_length = 100)
+    platform_user_id = models.CharField(max_length=100)
     users            = models.ForeignKey(User, on_delete=models.CASCADE)
     platform         = models.ForeignKey(Platform, on_delete=models.CASCADE)
 
