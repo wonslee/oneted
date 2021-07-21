@@ -1,5 +1,7 @@
 from django.db import models
+
 from oneted.common import TimeStampModel
+from jobpostings   import JobPosting
 
 # Create your views here.
 class User(TimeStampModel):
@@ -26,7 +28,9 @@ class UserPlatform(models.Model):
     class Meta :
         db_table = "users_platforms"
 
-class Bookmark(models.Model):
+class Bookmark(TimeStampModel):
+    user    = models.ForeignKey(User, on_delete=models.CASCADE)
+    job_posting = models.ForeignKey(JobPosting, on_delete=models.CASCADE)
 
     class Meta :
         db_table = "bookmarks"
