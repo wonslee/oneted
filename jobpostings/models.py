@@ -57,7 +57,12 @@ class JobPosting(TimeStampModel):
     company     = models.ForeignKey(Company, on_delete=models.PROTECT, related_name="job_posting")
     tags        = models.ManyToManyField(Tag, through="TagJobPosting", related_name="job_posting")
     title       = models.CharField(max_length=300)
-    description = models.TextField()
+    description = models.TextField(null=True)
+    main_task   = models.TextField(null=True)
+    requirement = models.TextField(null=True)
+    preference  = models.TextField(null=True)
+    benefit     = models.TextField(null=True)
+    due_date    = models.DateTimeField(null=True)
     image_url   = models.URLField(max_length=3000, null=True)
 
     class Meta:
