@@ -52,11 +52,19 @@ class Job(models.Model):
     class Meta:
         db_table = "jobs"
 
+class Experience(models.Model):
+    name = models.CharField(max_length=20)
+
+    class Meta:
+        db_table = "experiences"
+
 class JobPosting(TimeStampModel):
     job         = models.ForeignKey(Job, on_delete=models.PROTECT, related_name="job_posting")
     company     = models.ForeignKey(Company, on_delete=models.PROTECT, related_name="job_posting")
+    experience  = models.ForeignKey(Experience, on_delete=models.PROTECT, related_name="job_posting")
     tags        = models.ManyToManyField(Tag, through="TagJobPosting", related_name="job_posting")
     title       = models.CharField(max_length=300)
+    salary      = models.IntegerField()
     description = models.TextField(null=True)
     main_task   = models.TextField(null=True)
     requirement = models.TextField(null=True)
