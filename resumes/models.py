@@ -6,10 +6,10 @@ from jobposting    import JobPosting
 
 class Resume(TimeStampModel):
     user     = models.ForeginKey(User, on_delete=CASCADE)
-    is_done  = models.BooleanField(default=false)
-    file_url = models.URLField()
-    content  = data = models.JSONField(default="{}")
-    is_file  = models.BooleanField(default=false)
+    is_done  = models.BooleanField(default=False)
+    file_url = models.URLField(null=True)
+    content  = models.JSONField(default=dict)
+    is_file  = models.BooleanField(default=False)
     applies  = models.ManyToMany("Apply", through="ResumeApply", related_name="resume")
 
     class Meta:
@@ -17,7 +17,7 @@ class Resume(TimeStampModel):
 
 class Apply(TimeStampModel):
     job_posting = models.ForeginKey(JobPosting, on_delete=CASCADE)
-    user        = models.ForeginKey(User, on_delete=CASCASDE)
+    user        = models.ForeginKey(User, on_delete=CASCADE)
 
     class Meta:
         db_table = "applies"
@@ -28,3 +28,4 @@ class ResumeApply(models.Model):
 
     class Meta:
         db_table = "resumes_applies"
+        unique_together = ["resume", "apply"]
