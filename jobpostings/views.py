@@ -16,7 +16,7 @@ class TagCategoryView(View):
                 } for tag in tag_category.tag.all()],
             } for tag_category in tag_categories]
 
-        return JsonResponse({"message":"SUCCESS", "result" : {"tagCategories" : tag_category_list}}, status=200)
+        return JsonResponse({"message" : "SUCCESS", "result" : tag_category_list}, status=200)
 
 class JobGroupView(View):
     def get(self, request):
@@ -30,4 +30,4 @@ class JobGroupView(View):
                 } for job in job_group.job.all()],
             } for job_group in job_groups]
 
-        return JsonResponse({"message":"SUCCESS", "result" : {"jobGroups" : job_group_list}}, status=200)
+        return JsonResponse({"message" : "SUCCESS", "result" : job_group_list}, status=200)

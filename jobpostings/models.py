@@ -21,6 +21,7 @@ class Company(models.Model):
     description    = models.TextField()
     employee_count = models.IntegerField()
     coordinate     = models.JSONField()
+    image_url      = models.URLField(max_length=3000, null=True)
 
     class Meta:
         db_table = "companies"
