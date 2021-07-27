@@ -1,3 +1,5 @@
+import json
+from json.decoder       import JSONDecodeError
 from django.views       import View
 from django.http        import JsonResponse
 
@@ -18,6 +20,28 @@ class ResumesView(View):
 
         return JsonResponse({"message" : "SUCCESS", "result" : result}, status=200)
         
+    @authorization        
+    def post(self, request):
+        try:
+            data = json.loads(request.body)
+            Resume.objects.create(
+                user    = request.user,
+                is_done = data["isDone"],
+                title   = data["title"],
+                content = {
+                "description" : data["description"],
+                "career"      : data["career"],
+                "education"   : data["education"],
+                "skill"       : data["skill"],
+                })
+            return JsonResponse({"message" : "SUCCESS"}, status=200)
+
+        except KeyError:
+            return JsonResponse({"message" : "KEY_ERROR"}, status=400)
+
+        except JSONDecodeError:
+            return JsonResponse({"message" : "JSON_DECODE_ERROR"}, status=400)
+
 class ResumeView(View):
     @authorization
     def get(self, request, resume_id):

@@ -128,3 +128,40 @@ class ResumeTest(TestCase):
         response     = client.get("/resumes/1000", content_type="application/json", **headers)
         self.assertEqual(response.status_code, 401)
         self.assertEqual(response.json(), {'message' : 'RESUME_NOT_FOUND'})
+        
+    def test_resume_post_success(self):
+        client       = Client()
+        access_token = jwt.encode(payload={"user_id" : 1}, key=SECRET_KEY, algorithm=ALGORITHM)
+        headers      = {'HTTP_AUTHORIZATION': access_token}
+        body_data    = {
+            "title"         : "수요일의 이력서",
+            "isDone"        : False,
+            "description"   : "안녕하세요~",
+            "career"        : "샘성전자 5년 근무",
+            "education"     : "샘성대",
+            "skill"         : "장고, 파이썬, 자바스크립트",
+        }
+        response = client.post("/resumes", content_type="text/html", data=json.dumps(body_data), **headers)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), {"message": "SUCCESS"})
+
+    def test_resume_post_key_error(self):
+        client       = Client()
+        access_token = jwt.encode(payload={"user_id" : 1}, key=SECRET_KEY, algorithm=ALGORITHM)
+        headers      = {'HTTP_AUTHORIZATION': access_token}
+        body_data    = {
+            "title"         : "수요일의 이력서",
+            "isDone"        : False,
+            "description"   : "안녕하세요~",
+        }
+        response = client.post("/resumes", content_type="text/html", data=json.dumps(body_data), **headers)
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json(),{"message" : "KEY_ERROR"})
+
+    def test_resume_post_json_decode_error(self):
+        client       = Client()
+        access_token = jwt.encode(payload={"user_id" : 1}, key=SECRET_KEY, algorithm=ALGORITHM)
+        headers      = {'HTTP_AUTHORIZATION': access_token}
+        response     = client.post("/resumes", **headers)
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json(),{"message" : "JSON_DECODE_ERROR"})
