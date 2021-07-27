@@ -2,6 +2,7 @@ import json
 from json.decoder       import JSONDecodeError
 from django.views       import View
 from django.http        import JsonResponse
+from django.utils       import timezone
 
 from resumes.models     import Resume
 from utils              import authorization
@@ -43,6 +44,7 @@ class ResumesView(View):
             return JsonResponse({"message" : "JSON_DECODE_ERROR"}, status=400)
 
 class ResumeView(View):
+
     @authorization
     def get(self, request, resume_id):
         if not Resume.objects.filter(id=resume_id, user=request.user).exists():
@@ -63,3 +65,31 @@ class ResumeView(View):
         }
         
         return JsonResponse({"message" : "SUCCESS", "result" : result}, status=200)
+
+    @authorization
+    def patch(self, request, resume_id):
+        try:
+            data   = json.loads(request.body)
+            resume = Resume.objects.filter(id=resume_id, user=request.user)
+            
+            if not resume.exists():
+                return JsonResponse({"message" : "RESUME_NOT_FOUND"}, status=400)
+            
+            resume.update(
+                is_done = data["isDone"],
+                title   = data["title"],
+                content = {
+                    "description" : data["description"],
+                    "career"      : data["career"],
+                    "education"   : data["education"],
+                    "skill"       : data["skill"],
+                },
+                updated_at = timezone.now()
+            )
+            return JsonResponse({"message" : "SUCCESS"}, status=200)
+
+        except JSONDecodeError:
+            return JsonResponse({"message" : "JSON_DECODE_ERROR"}, status=400)
+
+        except KeyError:
+            return JsonResponse({"message" : "KEY_ERROR"}, status=400)
