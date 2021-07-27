@@ -2,7 +2,7 @@ from django.views       import View
 from django.http        import JsonResponse
 from django.db.models   import Q, Count
 
-from jobpostings.models import TagCategory, JobGroup, JobPosting
+from jobpostings.models import TagCategory, JobGroup, Company, JobPosting, Tag
 
 class TagCategoryView(View):
     def get(self, request):
@@ -84,3 +84,30 @@ class PostingsView(View):
         } for job_posting in job_postings]
 
         return JsonResponse({"message":"SUCCESS", "result":job_posting_list}, status=200)
+
+class SuggestView(View):
+    def get(self, request):
+        try:
+            query        = request.GET["query"]
+            job_postings = JobPosting.objects.filter(title__contains= query).values("id", "title")[0:4]
+            tags         = Tag.objects.filter(name__contains=query).values("id", "name")[0:4]
+            companies    = Company.objects.filter(name__contains=query).values("id", "name")[0:4]
+            result       = {
+                "jobPostings" : [{
+                    "id"    : job_posting["id"],
+                    "title" : job_posting["title"],
+                }for job_posting in job_postings],
+                "tags" : [{
+                    "id"   : tag["id"],
+                    "name" : tag["name"],
+                }for tag in tags],
+                "companies" : [{
+                    "id"   : company["id"],
+                    "name" : company["name"],
+                }for company in companies],
+            }
+
+            return JsonResponse({"message":"SUCCESS", "result":result}, status=200)
+
+        except KeyError:
+            return JsonResponse({"message" : "KEY_ERROR"}, status=400)
