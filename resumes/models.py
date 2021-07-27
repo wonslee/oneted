@@ -11,7 +11,7 @@ class Resume(TimeStampModel):
     file_url  = models.URLField(null=True)
     content   = models.JSONField(default=dict)
     is_file   = models.BooleanField(default=False)
-    file_uuid = models.CharField(max_length=200)
+    file_uuid = models.CharField(max_length=200, null=True)
     applies   = models.ManyToManyField("Apply", through="ResumeApply", related_name="resume")
 
     class Meta:
