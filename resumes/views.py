@@ -93,3 +93,12 @@ class ResumeView(View):
 
         except KeyError:
             return JsonResponse({"message" : "KEY_ERROR"}, status=400)
+            
+    @authorization
+    def delete(self, request, resume_id):
+        if not Resume.objects.filter(id=resume_id, user=request.user).exists():
+            return JsonResponse({"message" : "RESUME_NOT_FOUND"}, status=404)
+
+        Resume.objects.get(id=resume_id, user=request.user).delete()
+        
+        return JsonResponse({"message" : "SUCCESS"}, status=200)

@@ -18,7 +18,7 @@ class ResumesTest(TestCase):
 
         Resume.objects.create(
             id          = 1,
-            user_id     = 1, 
+            user_id     = 1,
             title       = "호머 심슨 이력서", 
             is_done     = True,
             is_file     = False,
@@ -169,3 +169,35 @@ class ResumeTest(TestCase):
         response     = client.get("/resumes/1000", content_type="application/json", **headers)
         self.assertEqual(response.status_code, 401)
         self.assertEqual(response.json(), {'message' : 'RESUME_NOT_FOUND'})
+
+    def test_resume_patch_success(self):
+        client       = Client()
+        access_token = jwt.encode(payload={"user_id" : 1}, key=SECRET_KEY, algorithm=ALGORITHM)
+        headers      = {'HTTP_AUTHORIZATION': access_token}
+        response = client.delete("/resumes/1", **headers)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), {"message": "SUCCESS"})
+
+    def test_resume_patch_key_error(self):
+        client       = Client()
+        access_token = jwt.encode(payload={"user_id" : 1}, key=SECRET_KEY, algorithm=ALGORITHM)
+        headers      = {'HTTP_AUTHORIZATION': access_token}
+        response = client.delete("/resumes/1000", **headers)
+        self.assertEqual(response.status_code, 401)
+        self.assertEqual(response.json(), {"message" : "RESUME_NOT_FOUND"})
+
+    def test_resume_delete_success(self):
+        client       = Client()
+        access_token = jwt.encode(payload={"user_id" : 1}, key=SECRET_KEY, algorithm=ALGORITHM)
+        headers      = {'HTTP_AUTHORIZATION': access_token}
+        response = client.delete("/resumes/1", **headers)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), {"message": "SUCCESS"})
+
+    def test_resume_delete_not_found(self):
+        client       = Client()
+        access_token = jwt.encode(payload={"user_id" : 1}, key=SECRET_KEY, algorithm=ALGORITHM)
+        headers      = {'HTTP_AUTHORIZATION': access_token}
+        response = client.delete("/resumes/1000", **headers)
+        self.assertEqual(response.status_code, 401)
+        self.assertEqual(response.json(), {"message": "RESUME_NOT_FOUND"})
