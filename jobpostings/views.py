@@ -1,11 +1,11 @@
 import json
-
-from django.views import View
-from django.http  import JsonResponse
+from json.decoder       import JSONDecodeError
+from django.views       import View
+from django.http        import JsonResponse
 from django.db.models   import Q, Count
 
 from jobpostings.models import TagCategory, JobGroup, Company, JobPosting, Tag
-from resumes.models     import Resume
+from resumes.models     import Apply, Resume
 from users.models       import Bookmark
 from utils              import lose_authorization, authorization
 
@@ -69,7 +69,11 @@ class PostingsView(View):
         if tags:
             q &= Q(tags__name__in=tags)
 
-        job_postings     = JobPosting.objects.select_related("job", "experience", "company", "company__region", "company__region__country").annotate(bookmark_count=Count("bookmark"), apply_count=Count("apply")).filter(q).distinct().order_by(sorted_dict[order_by])[offset * limit : (offset * limit) + limit]
+        job_postings   = JobPosting.objects.select_related("job", "experience", "company", "company__region", "company__region__country")\
+                                             .annotate(bookmark_count=Count("bookmark"), apply_count=Count("apply")).filter(q).distinct()\
+                                             .order_by(sorted_dict[order_by])
+        job_postings_count = job_postings.count()
+        
         job_posting_list = [{
             "id"            : job_posting.id,
             "title"         : job_posting.title,
@@ -88,9 +92,9 @@ class PostingsView(View):
                 "id"   : job_posting.job.id,
                 "name" : job_posting.job.name,
             }
-        } for job_posting in job_postings]
+        } for job_posting in job_postings[offset : offset + limit]]
 
-        return JsonResponse({"message":"SUCCESS", "result":job_posting_list}, status=200)
+        return JsonResponse({"message":"SUCCESS", "count" : job_postings_count, "result":job_posting_list}, status=200)
 
 class SuggestView(View):
     def get(self, request):
@@ -154,3 +158,26 @@ class PostingView(View):
         }
 
         return JsonResponse({"message":"SUCCESS", "result":job_posting_info}, status=200)
+
+class ApplyView(View):
+    @authorization
+    def post(self, request, posting_id):
+        try:
+            data    = json.loads(request.body)
+            resumes = Resume.objects.filter(id__in=data["resumeList"], user=request.user)
+
+            if not resumes.exists():
+                return JsonResponse({"message" : "NO_RESUME_SELECTED"}, status=400)
+            
+            if Apply.objects.filter(job_posting__id=posting_id, user=request.user).exists():
+                return JsonResponse({"message" : "APPLY_ALREADY_EXIST"}, status=400)
+
+            Apply.objects.create(user=request.user, job_posting_id=posting_id).resume.set(resumes)
+            
+            return JsonResponse({"message":"SUCCESS"}, status=200)
+        
+        except KeyError:
+            return JsonResponse({"message" : "KEY_ERROR"}, status=400)
+
+        except JSONDecodeError:
+            return JsonResponse({"message" : "JDON_DECODE_ERROR"}, status=400)
