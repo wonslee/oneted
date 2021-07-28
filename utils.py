@@ -1,5 +1,7 @@
 import jwt
+
 from django.http import JsonResponse
+
 from my_settings import SECRET_KEY, ALGORITHM
 from users.models import User
 
@@ -12,6 +14,7 @@ def authorization(func):
 
         try:
             payload = jwt.decode(token, SECRET_KEY, algorithms=ALGORITHM)
+
             if User.objects.filter(id=payload['user_id']).exists():
                 request.user = User.objects.get(id=payload['user_id'])
                 return func(self, request, *args, **kwargs)
