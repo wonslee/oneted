@@ -1,10 +1,14 @@
+import boto3
+import uuid
 import json
+
 from json.decoder       import JSONDecodeError
 from django.views       import View
 from django.http        import JsonResponse
 from django.utils       import timezone
 
 from resumes.models     import Resume, Apply, ResumeApply
+from my_settings        import AWS_S3_ACCESS_KEY_ID, AWS_S3_SECRET_ACCESS_KEY, BUCKET, AWS_S3_URL
 from utils              import authorization
 
 class ResumesView(View):
@@ -73,7 +77,7 @@ class ResumeView(View):
             resume = Resume.objects.filter(id=resume_id, user=request.user)
             
             if not resume.exists():
-                return JsonResponse({"message" : "RESUME_NOT_FOUND"}, status=400)
+                return JsonResponse({"message" : "RESUME_NOT_FOUND"}, status=401)
             
             resume.update(
                 is_done = data["isDone"],
@@ -97,7 +101,7 @@ class ResumeView(View):
     @authorization
     def delete(self, request, resume_id):
         if not Resume.objects.filter(id=resume_id, user=request.user).exists():
-            return JsonResponse({"message" : "RESUME_NOT_FOUND"}, status=404)
+            return JsonResponse({"message" : "RESUME_NOT_FOUND"}, status=401)
 
         Resume.objects.get(id=resume_id, user=request.user).delete()
         
@@ -121,3 +125,59 @@ class ResumeApply(View):
         )
 
         return JsonResponse({"message":"SUCCESS"}, status = 201)
+
+class ResumeFile(View):
+    s3_client = boto3.client(
+        's3',
+        aws_access_key_id=AWS_S3_ACCESS_KEY_ID,
+        aws_secret_access_key=AWS_S3_SECRET_ACCESS_KEY,
+    )
+
+    @authorization
+    def post(self, request):
+        user      = request.user
+        resume_id = request.GET.get("resume_id")
+
+        if not len(request.FILES):
+            return JsonResponse({"message": "FILE_NONE"}, status=404)
+
+        for file in request.FILES.getlist('file'):
+            resume, is_created = Resume.objects.get_or_create(
+                id       = resume_id,
+                user     = user,
+                defaults = {
+                    "user_id": user.id,
+                    "title": "default",
+                    "is_done": True,
+                    "file_url": "default",
+                    "is_file": True,
+                    "file_uuid": str(uuid.uuid4())
+                }
+            )
+            self.s3_client.upload_fileobj(
+                file,
+                BUCKET,
+                resume.file_uuid,
+                ExtraArgs = {
+                    "ContentType": file.content_type,
+                }
+            )
+
+            file_urls = f"{AWS_S3_URL}/{BUCKET}/{resume.file_uuid}"
+
+            resume.file_url = file_urls
+            resume.title    = file.name
+            resume.save()
+
+        return JsonResponse({"message": "SUCCESS"}, status=201)
+
+    @authorization
+    def delete(self, request, resume_id):
+        user = request.user
+
+        if not Resume.objects.filter(id=resume_id, user=user).exists():
+            return JsonResponse({"message": "INVILD_RESUME"}, status=404)
+
+        self.s3_client.delete_object(Bucket=BUCKET, Key=Resume.objects.get(id=resume_id, user=user).file_uuid)
+
+        return JsonResponse({"message": "SUCCESS"}, status=200)

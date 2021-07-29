@@ -92,3 +92,4 @@ class UserView(View):
         }
 
         return JsonResponse({"message":"SUCCESS", "result" : user_info}, status=200)
+

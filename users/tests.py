@@ -1,8 +1,8 @@
 import jwt
 
-from django.test    	import TestCase, Client
-from django.test    	import Client
-from unittest.mock  	import patch, MagicMock
+from django.test        import TestCase, Client
+from django.test        import Client
+from unittest.mock      import patch, MagicMock
 
 from users.models       import User, Bookmark
 from resumes.models     import Apply, Resume
