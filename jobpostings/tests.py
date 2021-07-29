@@ -509,9 +509,64 @@ class SuggestTest(TestCase):
             }
         })
 
-
     def test_suggest_get_key_error(self):
         client   = Client()
         response = client.get('/jobpostings/suggested')
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json(), {"message" : "KEY_ERROR"})
+
+class PostingDetailViewTest(TestCase):
+    def setUp(self):
+        Country.objects.create(
+            id   = 1,
+            name = "한국"
+        )
+        Region.objects.create(
+            id         = 1,
+            country_id = 1,
+            name       = "서울"
+        )
+        Company.objects.create(
+            id             = 1,
+            region_id      = 1,
+            name           = "요기요",
+            description    = "요기요",
+            employee_count = 150,
+            coordinate     = { "latitude" : "37.490276608139034", "longitude" : "127.00519275854258"}
+        )
+        Experience.objects.create(
+            id   = 1,
+            name = "1년"
+        )
+        JobGroup.objects.create(
+            id   = 1,
+            name = "개발"
+        )
+        Job.objects.create(
+            id           = 1,
+            job_group_id = 1
+        )
+
+    def tearDown(self):
+        JobPosting.objects.all().delete()
+        Job.objects.all().delete()
+        JobGroup.objects.all().delete()
+        Experience.objects.all().delete()
+        Company.objects.all().delete()
+        Region.objects.all().delete()
+        Country.objects.all().delete()
+
+    def test_posting_detail_view_get_success(self):
+        client = Client()
+        response = client.get('/jobpostings/1')
+        job_posting_info = response.json()["result"]
+        print(job_posting_info)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), {"message":"SUCCESS", "result":job_posting_info})
+
+    def test_posting_detail_view_get_Unauthorized(self):
+        client = Client()
+        response = client.get('/jobpostings/2')
+
+        self.assertEqual(response.status_code, 401)

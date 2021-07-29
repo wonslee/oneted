@@ -1,12 +1,18 @@
-from django.views       import View
-from django.http        import JsonResponse
+import json
+
+from django.views import View
+from django.http  import JsonResponse
 from django.db.models   import Q, Count
 
 from jobpostings.models import TagCategory, JobGroup, Company, JobPosting, Tag
+from resumes.models     import Resume
+from users.models       import Bookmark
+from utils              import lose_authorization, authorization
 
 class TagCategoryView(View):
     def get(self, request):
         tag_categories    = TagCategory.objects.prefetch_related("tag").all()
+
         tag_category_list = [{
                 "id"                 : tag_category.id,
                 "name"               : tag_category.name,
@@ -22,6 +28,7 @@ class TagCategoryView(View):
 class JobGroupView(View):
     def get(self, request):
         job_groups     = JobGroup.objects.prefetch_related("job").all()
+
         job_group_list = [{
                 "id"   : job_group.id,
                 "name" : job_group.name,
@@ -111,3 +118,39 @@ class SuggestView(View):
 
         except KeyError:
             return JsonResponse({"message" : "KEY_ERROR"}, status=400)
+
+class PostingView(View):
+    @lose_authorization
+    def get(self, request, posting_id):
+        user = request.user
+
+        if not JobPosting.objects.filter(id=posting_id).exists():
+            return JsonResponse({"message" : "NOT_FOUND"}, status=404)
+
+        job_posting = JobPosting.objects.get(id=posting_id)
+        bookmark    = Bookmark.objects.filter(user=user, job_posting=posting_id).exists()
+
+        job_posting_info = {
+            "job_posting_id"    : job_posting.pk,
+            "job_posting_title" : job_posting.title,
+            "salary"            : job_posting.salary,
+            "due_date"          : job_posting.due_date,
+            "image_url"         : job_posting.image_url,
+            "job"               : job_posting.job.name,
+            "experience"        : job_posting.experience.name,
+            "bookmark"          : bookmark,
+            "company_info"      : {
+                "company_name" : job_posting.company.name,
+                "coordinate"   : job_posting.company.coordinate,
+            },
+            "description"       : {
+                "benefit"          : job_posting.benefit,
+                "intro"            : job_posting.description,
+                "main_task"        : job_posting.main_task,
+                "preference_point" : job_posting.preference,
+                "requirements"     : job_posting.requirement
+            },
+            "tag_info"          : [ tag.name for tag in job_posting.tags.all()]
+        }
+
+        return JsonResponse({"message":"SUCCESS", "result":job_posting_info}, status=200)

@@ -18,21 +18,21 @@ class BookmarkTest(TestCase):
 			name = "한국"
 		)
 		Region.objects.create(
-			id         = 1,
+			id 		   = 1,
 			country_id = 1,
-			name       = "서울"
+			name 	   = "서울"
 		)
 		Company.objects.create(
-			id             = 1,
-			region_id      = 1,
-			name           = "요기요",
+			id 			   = 1,
+			region_id 	   = 1,
+			name 		   = "요기요",
 			description    = "요기요",
 			employee_count = 150,
-			coordinate     = { "latitude" : "37.490276608139034", "longitude" : "127.00519275854258"}
+			coordinate 	   = { "latitude" : "37.490276608139034", "longitude" : "127.00519275854258"}
 		)
 		Company.objects.create(
-			id             = 2,
-			region_id      = 1,
+			id 			   = 2,
+			region_id 	   = 1,
 			name           = "요기요2",
 			description    = "요기요2",
 			employee_count = 150,
@@ -208,4 +208,3 @@ class kakaologin(TestCase):
 		self.assertEqual(response.json(), {
 			"message":"INVAID_ACCESS_TOKEN"
 		})
-

@@ -12,6 +12,9 @@ def authorization(func):
         if token is None:
             return JsonResponse({'error': 'ENTER_THE_TOKEN'}, status=401)
 
+        token = request.headers.get('Authorization', None)
+        if token is None:
+            return JsonResponse({'error': 'ENTER_THE_TOKEN'}, status=401)
         try:
             payload = jwt.decode(token, SECRET_KEY, algorithms=ALGORITHM)
 
@@ -27,6 +30,7 @@ def authorization(func):
             return JsonResponse({'error': 'EXPIRED_SIGNATURE'}, status=401)
         except jwt.DecodeError:
             return JsonResponse({'error': 'INVALID_TOKEN'}, status=401)
+
     return wrapper
 
 def lose_authorization(func):
@@ -52,4 +56,5 @@ def lose_authorization(func):
             return JsonResponse({'error': 'EXPIRED_SIGNATURE'}, status=401)
         except jwt.DecodeError:
             return JsonResponse({'error': 'INVALID_TOKEN'}, status=401)
+
     return wrapper
