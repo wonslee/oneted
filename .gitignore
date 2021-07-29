@@ -362,5 +362,6 @@ zsdoc/data
 my_settings.py
 uploader.py
 .idea
+users/makedummys.py
 
 # End of https://www.toptal.com/developers/gitignore/api/python,visualstudiocode,linux,pycharm,vim,macos,zshp

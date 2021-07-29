@@ -4,10 +4,10 @@ from django.test    	import TestCase, Client
 from django.test    	import Client
 from unittest.mock  	import patch, MagicMock
 
-from users.models		import User, Bookmark
-from resumes.models 	import Apply, Resume
+from users.models       import User, Bookmark
+from resumes.models     import Apply, Resume
 from jobpostings.models import JobPosting, Country, Region, Company, JobGroup, Job, Experience, Tag, TagCategory
-from my_settings		import SECRET_KEY, ALGORITHM
+from my_settings        import SECRET_KEY, ALGORITHM
 
 class BookmarkTest(TestCase):
 	def setUp(self):
@@ -16,25 +16,25 @@ class BookmarkTest(TestCase):
 			name = "한국"
 		)
 		Region.objects.create(
-			id 		   = 1,
+			id         = 1,
 			country_id = 1,
-			name 	   = "서울"
+			name       = "서울"
 		)
 		Company.objects.create(
-			id 			   = 1,
-			region_id 	   = 1,
-			name 		   = "요기요",
+			id             = 1,
+			region_id      = 1,
+			name           = "요기요",
 			description    = "요기요",
 			employee_count = 150,
-			coordinate 	   = { "latitude" : "37.490276608139034", "longitude" : "127.00519275854258"}
+			coordinate     = { "latitude" : "37.490276608139034", "longitude" : "127.00519275854258"}
 		)
 		Company.objects.create(
-			id 			   = 2,
-			region_id 	   = 1,
+			id             = 2,
+			region_id      = 1,
 			name           = "요기요2",
 			description    = "요기요2",
 			employee_count = 150,
-			coordinate     ={"latitude": "37.490276608139034", "longitude": "127.00519275854258"}
+			coordinate     = {"latitude": "37.490276608139034", "longitude": "127.00519275854258"}
 		)
 		Experience.objects.create(
 			id   = 1,
@@ -44,11 +44,11 @@ class BookmarkTest(TestCase):
 			id   = 1,
 			name = "개발"
 		)
-		Job.objects.create(
-			id           = 1,
-			job_group_id = 1,
-			name         = "파이썬개발자"
-		)
+        Job.objects.create(
+            id           = 1,
+            job_group_id = 1,
+            name         = "파이썬개발자"
+        )
 		JobPosting.objects.create(
 			id            = 1,
 			job_id        = 1,
@@ -99,11 +99,11 @@ class BookmarkTest(TestCase):
 		})
 
 	def test_bookmarkview_valid_value_success(self):
-		client      = Client()
-		user        = User.objects.get(name="홍길동")
-		encoded_jwt = jwt.encode({"user_id": user.id}, SECRET_KEY, algorithm=ALGORITHM)
-		headers     = {"HTTP_AUTHORIZATION":f'{encoded_jwt}'}
-		response    = client.post('/users/bookmark/2', **headers)
+        client      = Client()
+        user        = User.objects.get(name="홍길동")
+        encoded_jwt = jwt.encode({"user_id": user.id}, SECRET_KEY, algorithm=ALGORITHM)
+        headers     = {"HTTP_AUTHORIZATION":f'{encoded_jwt}'}
+        response    = client.post('/users/bookmark/2', **headers)
 
 		self.assertEqual(response.status_code, 201)
 		self.assertEqual(response.json(),{
@@ -111,6 +111,10 @@ class BookmarkTest(TestCase):
 		})
 
 	def test_bookmarkview_invalid_user(self):
+		client      = Client()
+		encoded_jwt = jwt.encode({"user_id": 2}, SECRET_KEY, algorithm=ALGORITHM)
+		headers     = {"HTTP_AUTHORIZATION":f'{encoded_jwt}'}
+		response    = client.post('/users/bookmark/1', **headers)
 		client      = Client()
 		encoded_jwt = jwt.encode({"user_id": 2}, SECRET_KEY, algorithm=ALGORITHM)
 		headers     = {"HTTP_AUTHORIZATION":f'{encoded_jwt}'}
@@ -141,21 +145,21 @@ class kakaologin(TestCase):
 				return {
 					"id": 1234567899,
 					"kakao_account": {
-						"profile_needs_agreement"   : False,
-						"profile"                   : {
-							"nickname"            : "홍길동",
-							"thumbnail_image_url" : "http://yyy.kakao.com/.../img_110x110.jpg",
-							"profile_image_url"   : "http://yyy.kakao.com/dn/.../img_640x640.jpg",
-							"is_default_image"    : False
+					"profile_needs_agreement": False,
+						"profile": {
+							"nickname": "홍길동",
+							"thumbnail_image_url": "http://yyy.kakao.com/.../img_110x110.jpg",
+							"profile_image_url": "http://yyy.kakao.com/dn/.../img_640x640.jpg",
+							"is_default_image": False
 						},
-						"email_needs_agreement"     : False,
-						"is_email_valid"            : True,
-						"is_email_verified"         : True,
-						"email"                     : "sample@sample.com",
-						"age_range_needs_agreement" : False,
-						"age_range"                 : "20~29",
-						"birthday_needs_agreement"  : False,
-						"birthday"                  : "1130"
+						"email_needs_agreement": False,
+						"is_email_valid": True,
+						"is_email_verified": True,
+						"email": "sample@sample.com",
+						"age_range_needs_agreement": False,
+						"age_range": "20~29",
+						"birthday_needs_agreement": False,
+						"birthday": "1130"
 					}
 				}
 
@@ -180,25 +184,26 @@ class kakaologin(TestCase):
 				return {
 					"id": 1234567899,
 					"kakao_account": {
-						"profile_needs_agreement"   : False,
-						"profile"                   : {
-							"nickname"            : "홍길동",
-							"thumbnail_image_url" : "http://yyy.kakao.com/.../img_110x110.jpg",
-							"profile_image_url"   : "http://yyy.kakao.com/dn/.../img_640x640.jpg",
-							"is_default_image"    : False
+						"profile_needs_agreement": False,
+						"profile": {
+							"nickname": "홍길동",
+							"thumbnail_image_url": "http://yyy.kakao.com/.../img_110x110.jpg",
+							"profile_image_url": "http://yyy.kakao.com/dn/.../img_640x640.jpg",
+							"is_default_image": False
 						},
-						"email_needs_agreement"     : False,
-						"is_email_valid"            : True,
-						"is_email_verified"         : True,
-						"email"                     : "sample@sample.com",
-						"age_range_needs_agreement" : False,
-						"age_range"                 : "20~29",
-						"birthday_needs_agreement"  : False,
-						"birthday"                  : "1130"
+						"email_needs_agreement": False,
+						"is_email_valid": True,
+						"is_email_verified": True,
+						"email": "sample@sample.com",
+						"age_range_needs_agreement": False,
+						"age_range": "20~29",
+						"birthday_needs_agreement": False,
+						"birthday": "1130"
 					}
 				}
 
 		mocked_requests.get = MagicMock(return_value=MockedResponse())
+		response            = client.post("/users/kakaologin", content_type="applications/json", headers=headers)
 		headers             = {"HTTP_AUTHORIZATION": ""}
 		response            = client.post("/users/kakaologin", content_type="applications/json", headers=headers)
 

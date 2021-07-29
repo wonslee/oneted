@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
 from pathlib import Path
-from my_settings import DATABASES, SECRET_KEY, ALGORITHM
+from my_settings import DATABASES, SECRET_KEY, ALGORITHM, AWS_S3_ACCESS_KEY_ID, AWS_S3_SECRET_ACCESS_KEY, BUCKET
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -41,7 +41,8 @@ INSTALLED_APPS = [
     'django_extensions',
     'jobpostings',
     'users',
-    'resumes'
+    'resumes',
+    'storages'
 ]
 
 MIDDLEWARE = [
@@ -152,3 +153,12 @@ CORS_ALLOW_HEADERS = (
     'x-csrftoken',
     'x-requested-with'
 )
+
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+AWS_S3_SECURE_URLS = False       # use http instead of https
+AWS_QUERYSTRING_AUTH = False     # don't add complex authentication-related query parameters for requests
+
+AWS_S3_ACCESS_KEY_ID = AWS_S3_ACCESS_KEY_ID
+AWS_S3_SECRET_ACCESS_KEY = AWS_S3_SECRET_ACCESS_KEY
+AWS_STORAGE_BUCKET_NAME = BUCKET
+

@@ -4,7 +4,7 @@ from django.views       import View
 from django.http        import JsonResponse
 from django.utils       import timezone
 
-from resumes.models     import Resume
+from resumes.models     import Resume, Apply, ResumeApply
 from utils              import authorization
 
 class ResumesView(View):
@@ -102,3 +102,22 @@ class ResumeView(View):
         Resume.objects.get(id=resume_id, user=request.user).delete()
         
         return JsonResponse({"message" : "SUCCESS"}, status=200)
+
+class ResumeApply(View):
+    @authorization
+    def post(self, request):
+        data           = json.loads(request.body)
+        user           = request.user
+        resume_id      = data["resume_id"]
+        job_posting_id = data["job_posting_id"]
+
+        apply = Apply.objects.create(
+            user           = user,
+            job_posting_id = job_posting_id
+        )
+        ResumeApply.objects.create(
+            resume_id = resume_id,
+            apply     = apply
+        )
+
+        return JsonResponse({"message":"SUCCESS"}, status = 201)
