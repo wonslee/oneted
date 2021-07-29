@@ -715,3 +715,156 @@ class ApplyTest(TestCase):
         response = client.post('/jobpostings/2/apply', **headers)
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json(), {"message" : "JDON_DECODE_ERROR"})
+        
+class SalaryTest(TestCase):
+    def setUp(self):
+        JobGroup.objects.create(id=1, name="개발")
+        Job.objects.create(id=1, job_group_id=1, name="nodeJS 개발자")
+        Country.objects.create(id=1, name="한국")
+        Region.objects.create(id=1, country_id=1, name="서울")
+        Company.objects.create(id=1, region_id=1, name="모두싸인", description="모두싸모두싸인에 접속해 준비된 계약서를 업로드 한 후 계약 상대방의 이메일 주소 또는전화번호를 입력해 서명을 요청하면, 상대방은 이메일이나 카카오톡으로 링크를전달받습니다. 이 링크를 클릭해 전자서명을 하거나 전자 도장을 입력하면 계약이종료됩니다.", employee_count=178, coordinate={"latitude":"37.490894843703074", "longitude":" 127.00574996913497"})
+
+        Experience.objects.create(id=1, name="신입")
+        Experience.objects.create(id=2, name="1년차")
+        Experience.objects.create(id=3, name="2년차")
+        Experience.objects.create(id=4, name="3년차")
+        Experience.objects.create(id=5, name="4년차")
+        Experience.objects.create(id=6, name="5년차")
+        Experience.objects.create(id=7, name="6년차")
+        Experience.objects.create(id=8, name="7년차")
+        Experience.objects.create(id=9, name="8년차")
+        Experience.objects.create(id=10, name="9년차 이상")
+
+        JobPosting.objects.create(
+            id=1,
+            job_id=1, 
+            experience_id=1,
+            company_id=1, 
+            title="백엔드 엔지니어 (주니어)", 
+            salary=50000000, 
+        )
+        JobPosting.objects.create(
+            id=2,
+            job_id=1, 
+            experience_id=1,
+            company_id=1, 
+            title="백엔드 엔지니어 (주니어)", 
+            salary=60000000, 
+        )
+        JobPosting.objects.create(
+            id=3,
+            job_id=1, 
+            experience_id=2, 
+            company_id=1, 
+            title="프론트엔드 엔지니어 (주니어)", 
+            salary=60000000, 
+        )
+        JobPosting.objects.create(
+            id=4,
+            job_id=1, 
+            experience_id=2, 
+            company_id=1, 
+            title="프론트엔드 엔지니어 (주니어)", 
+            salary=70000000, 
+        )
+        JobPosting.objects.create(
+            id=5,
+            job_id=1, 
+            experience_id=3, 
+            company_id=1, 
+            title="파이썬 개발자", 
+            salary=70000000, 
+        )
+        JobPosting.objects.create(
+            id=6,
+            job_id=1, 
+            experience_id=3, 
+            company_id=1, 
+            title="파이썬 개발자", 
+            salary=80000000, 
+        )
+        JobPosting.objects.create(
+            id=7,
+            job_id=1, 
+            experience_id=4, 
+            company_id=1, 
+            title="소프트웨어 개발자", 
+            salary=90000000, 
+        )
+        JobPosting.objects.create(
+            id=8,
+            job_id=1, 
+            experience_id=5, 
+            company_id=1, 
+            title="백엔드 엔지니어 개발자", 
+            salary=140000000, 
+        )
+        JobPosting.objects.create(
+            id=9,
+            job_id=1, 
+            experience_id=6, 
+            company_id=1, 
+            title="백엔드 엔지니어 개발자", 
+            salary=120000000, 
+        )
+        JobPosting.objects.create(
+            id=10,
+            job_id=1, 
+            experience_id=7, 
+            company_id=1, 
+            title="백엔드 장인", 
+            salary=130000000, 
+        )
+        JobPosting.objects.create(
+            id=11,
+            job_id=1, 
+            experience_id=8, 
+            company_id=1, 
+            title="프론트엔드 장인", 
+            salary=150000000, 
+        )
+
+    def tearDown(self):
+        JobPosting.objects.all().delete()
+        Job.objects.all().delete()
+        JobGroup.objects.all().delete()
+        Country.objects.all().delete()
+        Region.objects.all().delete()
+        Company.objects.all().delete()
+        Experience.objects.all().delete()
+
+    def test_salary_get_success(self):
+        client   = Client()
+        response = client.get("/jobpostings/salary?job=nodeJS 개발자&jobGroup=개발")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), {
+            'message' : 'SUCCESS', 
+            'result'  : {
+                "id"            : 1,
+                "name"          : "nodeJS 개발자",
+                'postings_count': 11, 
+                'avg_total'     : 92727272.7273, 
+                'avg_zero'      : 55000000.0, 
+                'avg_one'       : 65000000.0, 
+                'avg_two'       : 75000000.0, 
+                'avg_three'     : 90000000.0, 
+                'avg_four'      : 140000000.0, 
+                'avg_five'      : 120000000.0, 
+                'avg_six'       : 130000000.0, 
+                'avg_seven'     : 150000000.0, 
+                'avg_eight'     : None, 
+                'avg_nine'      : None
+            }
+        })
+
+    def test_salary_get_no_params_error(self):
+        client   = Client()
+        response = client.get("/jobpostings/salary")
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json(), {"message":"QUERY_REQUIRED"})
+
+    def test_salary_get_not_found_error(self):
+        client   = Client()
+        response = client.get("/jobpostings/salary?job=개발새발&jobGroup=개발")
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.json(), {"message":"DATA_NOT_FOUND"})
