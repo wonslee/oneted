@@ -29,7 +29,7 @@
 
 ## 모델링 ERD
 
-![https://files.slack.com/files-pri/TH0U6FBTN-F029Q1TS20M/______________2021-07-31_20-25-17.png]
+https://files.slack.com/files-pri/TH0U6FBTN-F029Q1TS20M/______________2021-07-31_20-25-17.png
 
 ## 구현 기능
 
